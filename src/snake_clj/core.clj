@@ -32,6 +32,12 @@
                                       :up    [-1 0]
                                       :down  [1 0]}))
 
+(defn- move-ahead [world head heading]
+  (move-direction world head heading {:right [1 0]
+                                      :left  [-1 0]
+                                      :up    [0 -1]
+                                      :down  [0 1]}))
+
 (defn- is-tail? [snake p]
   (some #(= p %) snake))
 
@@ -52,7 +58,10 @@
   [snake-state]
   (direction-of snake-state move-left))
 
-(defn ahead-of [])
+(defn ahead-of
+  "Peek what's ahead"
+  [snake-state]
+  (direction-of snake-state move-ahead))
 
 (defn apple? [cell])
 

@@ -35,3 +35,20 @@
         "Can see left when going right")
     (is (= nil (left-of (snake-state world [[1 0] [0 0]] :left)))
         "Can see left when going left")))
+
+(deftest test-ahead-of
+  (is (= :tail (ahead-of (snake-state [[nil]] [[0 0]] :up)))
+      "Ahead of a 1 cell world is always the tail of a snake")
+  (is (= :tail (ahead-of (snake-state [[nil :apple]] [[1 0]] :up)))
+      "There is an apple ahead of snake")
+  (let [world [[nil nil :wall]
+               [nil nil nil]
+               [:apple nil :wall]]]
+    (is (= nil (ahead-of (snake-state world [[1 1] [1 0]] :up)))
+        "Can see ahead when going up")
+    (is (= nil (ahead-of (snake-state world [[1 1] [1 2]] :down)))
+        "Can see ahead when going down")
+    (is (= nil (ahead-of (snake-state world [[1 1] [2 1]] :right)))
+        "Can see ahead when going right")
+    (is (= :wall (ahead-of (snake-state world [[1 0] [0 0]] :left)))
+        "Can see ahead when going left")))
