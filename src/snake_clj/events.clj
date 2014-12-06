@@ -73,3 +73,11 @@
   {:pre [alive?
          (wall? (matrix/get-at world (head-of snake)))]}
   (kill state))
+
+;; EAT TAIL
+
+(defmethod handle-event :ate-tail
+  [{:keys [world snake alive?] :as state} _]
+  {:pre [alive?
+         (is-tail? (tail-of snake) (head-of snake))]}
+  (kill state))

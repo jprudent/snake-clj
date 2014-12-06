@@ -4,6 +4,9 @@
 (defn head-of [snake]
   (peek snake))
 
+(defn tail-of [snake]
+  (into [] (butlast snake)))
+
 (defn- move-direction [world [x y] heading transformation-vector]
   (let [[xt yt] (heading transformation-vector)
         y (mod (+ y yt) (matrix/arity-y world))
@@ -28,8 +31,8 @@
                                       :up    [0 -1]
                                       :down  [0 1]}))
 
-(defn- is-tail? [snake p]
-  (some #(= p %) snake))
+(defn is-tail? [tail p]
+  (some #(= p %) tail))
 
 (defn- direction-of [{:keys [world snake heading]} move-direction]
   (let [head (head-of snake)

@@ -24,4 +24,13 @@
         event (hit-wall 12)
         state (snake-state world [[2 0]] :up)
         {:keys [alive?]} (handle-event state event)]
-    (is (not alive?) "When snake hit a wall he is not alive anymore")))
+    (is (not alive?) "When snake hits a wall he is not alive anymore")))
+
+(deftest test-ate-tail
+  (let [world [[nil nil :wall]
+               [nil nil nil]
+               [:apple nil :wall]]
+        event (ate-tail 12)
+        state (snake-state world [[1 1] [1 0] [0 0] [0 1] [1 1]] :right)
+        {:keys [alive?]} (handle-event state event)]
+    (is (not alive?) "When snake eats his tail he is not alive anymore")))
