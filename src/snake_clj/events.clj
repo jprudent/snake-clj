@@ -100,11 +100,10 @@
   (heading {:right :left, :left :right, :up :down, :down :up}))
 
 (defn- neck-heading [world head neck]
-  (condp = head
-    (move-ahead world neck :up) :up
-    (move-ahead world neck :down) :down
-    (move-ahead world neck :left) :left
-    (move-ahead world neck :right) :right))
+  (first
+    (for [heading [:up :down :left :right]
+          :when (= head (move-ahead world neck heading))]
+      heading)))
 
 (defn- tail-heading
   "compute the heading of tail"
@@ -132,28 +131,29 @@
 
 ;; Turned right
 
+(defn right-heading-of [heading]
+  (heading {:down  :left,
+            :left  :up
+            :up    :right
+            :right :down}))
+
 (defmethod handle-event :turned-right
   [{:keys [heading alive?] :as state} _]
   {:pre [alive?]}
-  (assoc state :heading (heading {:down  :left,
-                                  :left  :up
-                                  :up    :right
-                                  :right :down})))
+  (assoc state :heading (right-heading-of heading)))
 
 ;; Turned left
 
 (defmethod handle-event :turned-left
   [{:keys [heading alive?] :as state} _]
   {:pre [alive?]}
-  (assoc state :heading (heading {:down  :righ,
-                                  :left  :down
-                                  :up    :left
-                                  :right :up})))
+  (assoc state :heading (reverse-heading (right-heading-of heading))))
+
+;; Gone ahead
 
 (defmethod handle-event :gone-ahead
   [{:keys [world heading snake alive?] :as state} _]
   {:pre [alive?]}
   (assoc state
-         :snake (-> snake
-                    (conj (move-ahead world (head-of snake) heading))
+         :snake (-> (conj snake (move-ahead world (head-of snake) heading))
                     (subvec 1))))
