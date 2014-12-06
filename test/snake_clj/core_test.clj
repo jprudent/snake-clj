@@ -20,4 +20,11 @@
   (is (= :tail (right-of {:world [[nil]] :snake [[0 0]]}))
       "Right of a 1 cell world is always the tail of a snake")
   (is (= :apple (right-of {:world [[nil :apple]] :snake [[0 0]]}))
-      "There is an apple right of snake"))
+      "There is an apple right of snake")
+  (let [world [[nil nil :wall]
+               [nil nil nil]
+               [:apple nil nil]]]
+    (is (= :wall (right-of {:world world :snake [[1 1] [1 0]]}))
+        "Can turn right when going up")
+    (is (= :apple (right-of {:world world :snake [[1 0] [1 1]]}))
+        "Can turn right when going down")))

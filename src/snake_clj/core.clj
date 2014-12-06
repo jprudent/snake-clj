@@ -12,11 +12,22 @@
       (nth x)))
 
 (defn- head [snake]
-  (peek snake))
+  (let [[[[x-neck y-neck] [x-head y-head :as head]]] (drop (- (count snake) 2) snake)
+        dir-x (- x-head x-neck)
+        dir-y (- y-head y-neck)
+        heading (if (zero? dir-x)
+                  (if (pos? dir-x) :right :left)
+                  (if (pos? dir-y) :bottom :top))]
+    [head heading]))
 
-(defn- move-right [world [x y]]
-  (let [y (mod y (arity-y world))
-        x (mod (inc x) (arity-x world))]
+(defn- move-right [world [x y] heading]
+  (let [[xr yr] (condp = heading
+                  :right [0 1]
+                  :left [0 -1]
+                  :up [1 0]
+                  :bottom [-1 0])
+        y (mod (+ y yr) (arity-y world))
+        x (mod (+ x xr) (arity-x world))]
     [x y]))
 
 (defn- is-tail? [snake p]
@@ -24,8 +35,8 @@
 
 (defn right-of [{world :world snake :snake}]
   (if world
-    (let [head-position (head snake)
-          new-head-position (move-right world head-position)]
+    (let [[head-position heading] (head snake)
+          new-head-position (move-right world head-position heading)]
       (prn snake new-head-position world)
       (if (is-tail? snake new-head-position)
         :tail
