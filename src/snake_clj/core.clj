@@ -12,20 +12,14 @@
       (nth x)))
 
 (defn- head [snake]
-  (let [[[[x-neck y-neck] [x-head y-head :as head]]] (drop (- (count snake) 2) snake)
-        dir-x (- x-head x-neck)
-        dir-y (- y-head y-neck)
-        heading (if (zero? dir-x)
-                  (if (pos? dir-x) :right :left)
-                  (if (pos? dir-y) :bottom :top))]
-    [head heading]))
+  (peek snake))
 
 (defn- move-right [world [x y] heading]
   (let [[xr yr] (condp = heading
                   :right [0 1]
                   :left [0 -1]
                   :up [1 0]
-                  :bottom [-1 0])
+                  :down [-1 0])
         y (mod (+ y yr) (arity-y world))
         x (mod (+ x xr) (arity-x world))]
     [x y]))
@@ -33,10 +27,10 @@
 (defn- is-tail? [snake p]
   (some #(= p %) snake))
 
-(defn right-of [{world :world snake :snake}]
+(defn right-of [{ :keys [world snake heading] :as snake-state}]
   (if world
-    (let [[head-position heading] (head snake)
-          new-head-position (move-right world head-position heading)]
+    (let [head (head snake)
+          new-head-position (move-right world head heading)]
       (prn snake new-head-position world)
       (if (is-tail? snake new-head-position)
         :tail
@@ -52,3 +46,12 @@
 (defn wall? [cell])
 
 (defn tail? [cell])
+
+(defn snake-state
+  "factory method that returns a snake state"
+  [world snake heading]
+  {:pre [(> (arity-x world) 0)
+         (> (arity-y world) 0)
+         (vector? snake)
+         (#{:up :down :right :left} heading)]}
+  {:world world :snake snake :heading heading})
