@@ -31,7 +31,10 @@
 (defn gone-ahead [id]
   (event :gone-ahead id))
 
-(defmulti handle-event (fn [event] (:event-type event)))
+;;;;;;;;;;;;;;;;;;
+;; Event handlers
+
+(defmulti handle-event (fn [state event] (:event-type event)))
 
 ;; GAME STARTED
 
@@ -52,7 +55,21 @@
     (gen/tuple f f)))
 
 (defmethod handle-event :game-started
-  [{seed :seed}]
+  [state {seed :seed}]
+  {:pre [(nil? state)]}
   (binding [gen/*rnd* (Random. seed)]
     (let [world (rand-world)]
       (snake-state world (rand-position world) (rand-heading)))))
+
+;; HIT WALL
+
+(defn- kill
+  "This method can kill snakes bare handed"
+  [state]
+  (assoc state :alive? false))
+
+(defmethod handle-event :hit-wall
+  [{:keys [world snake alive?] :as state} _]
+  {:pre [alive?
+         (wall? (matrix/get-at world (head-of snake)))]}
+  (kill state))

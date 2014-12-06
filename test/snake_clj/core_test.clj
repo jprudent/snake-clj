@@ -42,8 +42,8 @@
   (is (= :tail (ahead-of (snake-state [[nil :apple]] [[1 0]] :up)))
       "There is an apple ahead of snake")
   (let [world [[nil nil :wall]
-               [nil nil nil]
-               [:apple nil :wall]]]
+                 [nil nil nil]
+                 [:apple nil :wall]]]
     (is (= nil (ahead-of (snake-state world [[1 1] [1 0]] :up)))
         "Can see ahead when going up")
     (is (= nil (ahead-of (snake-state world [[1 1] [1 2]] :down)))

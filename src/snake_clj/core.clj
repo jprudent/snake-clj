@@ -1,7 +1,7 @@
 (ns snake-clj.core
   (:require [snake-clj.matrix :as matrix]))
 
-(defn- head [snake]
+(defn head-of [snake]
   (peek snake))
 
 (defn- move-direction [world [x y] heading transformation-vector]
@@ -32,7 +32,7 @@
   (some #(= p %) snake))
 
 (defn- direction-of [{:keys [world snake heading]} move-direction]
-  (let [head (head snake)
+  (let [head (head-of snake)
         new-head-position (move-direction world head heading)]
     (if (is-tail? snake new-head-position)
       :tail
@@ -66,4 +66,4 @@
          (> (matrix/arity-y world) 0)
          (vector? snake)
          (#{:up :down :right :left} heading)]}
-  {:world world :snake snake :heading heading})
+  {:world world :snake snake :heading heading :alive? true})
