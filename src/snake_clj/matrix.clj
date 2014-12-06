@@ -10,8 +10,3 @@
   (-> matrix
       (nth y)
       (nth x)))
-
-(defn rand-position [matrix]
-  (let [x (rand (arity-x matrix))
-        y (rand (arity-y matrix))]
-    [x y]))

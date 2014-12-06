@@ -5,7 +5,7 @@
     [snake-clj.db :as db]))
 
 (defn start-game []
-  (evt/game-started (db/next-id)))
+  (evt/game-started (db/next-id) 42))
 
 (defn- move [direction-of event-factory id]
   (when-let [snake (db/load-aggregate id)]

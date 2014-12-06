@@ -1,13 +1,17 @@
 (ns snake-clj.events
+  (:import (java.util Random))
   (:require [snake-clj.core :refer :all]
-            [snake-clj.matrix :as matrix]))
+            [snake-clj.matrix :as matrix]
+            [clojure.data.generators :as gen]))
 
 (defn- event [type id]
   {:event-type type
    :id         id})
 
-(defn game-started [id]
-  (event :game-started id))
+(defn game-started [id seed]
+  (assoc
+    (event :game-started id)
+    :seed seed))
 
 (defn hit-wall [id]
   (event :hit-wall id))
@@ -32,24 +36,23 @@
 ;; GAME STARTED
 
 (defn- rand-cell []
-  (let [r (rand-int 100)]
-    (cond
-      (<= r 10) :apple
-      (and (>= r 11) (<= r 35)) :wall
-      :else nil)))
+  (gen/weighted {:apple      1
+                 :wall       5
+                 (fn [] nil) 20}))
 
 (defn- rand-world []
   (partition 5 (for [_ (range 25)]
                  (rand-cell))))
 
 (defn- rand-heading []
-  (condp = (rand-int 4)
-    0 :top
-    1 :bottom
-    2 :right
-    4 :left))
+  (gen/one-of :up :down :right :left))
+
+(defn- rand-position [matrix]
+  (let [f (fn [] (gen/uniform 0 5))]
+    (gen/tuple f f)))
 
 (defmethod handle-event :game-started
-  [_]
-  (let [world (rand-world)]
-    (snake-state world (matrix/rand-position world) (rand-heading))))
+  [{seed :seed}]
+  (binding [gen/*rnd* (Random. seed)]
+    (let [world (rand-world)]
+      (snake-state world (rand-position world) (rand-heading)))))
