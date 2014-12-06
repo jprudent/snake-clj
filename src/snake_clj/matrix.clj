@@ -10,3 +10,7 @@
   (-> matrix
       (nth y)
       (nth x)))
+
+(defn set-at [matrix [x y] v]
+  (let [line (nth matrix y)]
+    (assoc matrix y (assoc line x v))))

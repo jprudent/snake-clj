@@ -51,7 +51,7 @@
   (gen/one-of :up :down :right :left))
 
 (defn- rand-position [matrix]
-  (let [f (fn [] (gen/uniform 0 5))]
+  (let [f (fn [] (gen/uniform 0 (matrix/arity-y matrix)))]
     (gen/tuple f f)))
 
 (defmethod handle-event :game-started
@@ -59,7 +59,7 @@
   {:pre [(nil? state)]}
   (binding [gen/*rnd* (Random. seed)]
     (let [world (rand-world)]
-      (snake-state world (rand-position world) (rand-heading)))))
+      (snake-state world (rand-position world) (rand-heading) seed))))
 
 ;; HIT WALL
 
@@ -77,7 +77,55 @@
 ;; EAT TAIL
 
 (defmethod handle-event :ate-tail
-  [{:keys [world snake alive?] :as state} _]
+  [{:keys [snake alive?] :as state} _]
   {:pre [alive?
          (is-tail? (tail-of snake) (head-of snake))]}
   (kill state))
+
+;; ATE APPLE
+
+(defn- free-cells [world snake]
+  (for [x (range (matrix/arity-x world))
+        y (range (matrix/arity-y world))
+        :let [p [x y]]
+        :when (and (not (is-tail? snake p))
+                   (nil? (matrix/get-at world p)))]
+    p))
+
+(defn- somewhere-free [world snake seed]
+  (binding [gen/*rnd* (Random. seed)]
+    (apply gen/one-of (free-cells world snake))))
+
+(defn- reverse-heading [heading]
+  (heading {:right :left, :left :right, :up :down, :down :up}))
+
+(defn- neck-heading [world head neck]
+  (condp = head
+    (move-ahead world neck :up) :up
+    (move-ahead world neck :down) :down
+    (move-ahead world neck :left) :left
+    (move-ahead world neck :right) :right))
+
+(defn- tail-heading
+  "compute the heading of tail"
+  [world snake heading]
+  (if (>= 2 (count snake))
+    (neck-heading world (second snake) (first snake))
+    heading))
+
+(defn- grow-tail [world snake heading]
+  (let [tailest (first snake)
+        rev-tail-heading (reverse-heading (tail-heading world snake heading))
+        new-tailest (move-ahead world tailest rev-tail-heading)]
+    (into [new-tailest] snake)))
+
+(defmethod handle-event :ate-apple
+  [{:keys [world snake alive? heading seed] :as state} _]
+  {:pre [alive?
+         (integer? seed)
+         (apple? (matrix/get-at world (head-of snake)))]}
+  (assoc state
+         :world (-> world
+                    (matrix/set-at (head-of snake) nil)
+                    (matrix/set-at (somewhere-free world snake seed) :apple))
+         :snake (grow-tail world snake heading)))

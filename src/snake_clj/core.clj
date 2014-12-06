@@ -25,7 +25,7 @@
                                       :up    [-1 0]
                                       :down  [1 0]}))
 
-(defn- move-ahead [world head heading]
+(defn move-ahead [world head heading]
   (move-direction world head heading {:right [1 0]
                                       :left  [-1 0]
                                       :up    [0 -1]
@@ -64,9 +64,9 @@
 
 (defn snake-state
   "factory method that returns a snake state"
-  [world snake heading]
+  [world snake heading seed]
   {:pre [(> (matrix/arity-x world) 0)
          (> (matrix/arity-y world) 0)
          (vector? snake)
          (#{:up :down :right :left} heading)]}
-  {:world world :snake snake :heading heading :alive? true})
+  {:world world :snake snake :heading heading :alive? true :seed seed})
