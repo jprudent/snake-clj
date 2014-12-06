@@ -15,9 +15,19 @@
                                     :world world}))))))
 
 (deftest test-right-of
-  (is (= nil (right-of {:world nil :snake nil}))
-      "When the world doesn't exist there is nothing right-of snake")
-  (is (= :tail (right-of {:world [[nil]] :snake [[0 0]]}))
+
+  (is (= :tail (right-of (snake-state [[nil]] [[0 0]] :up)))
       "Right of a 1 cell world is always the tail of a snake")
-  (is (= :apple (right-of {:world [[nil :apple]] :snake [[0 0]]}))
-      "There is an apple right of snake"))
+  (is (= :apple (right-of (snake-state [[nil :apple]] [[0 0]] :up)))
+      "There is an apple right of snake")
+  (let [world [[nil nil :wall]
+               [nil nil nil]
+               [:apple nil :wall]]]
+    (is (= :wall (right-of (snake-state world [[1 1] [1 0]] :up)))
+        "Can  see right when going up")
+    (is (= :apple (right-of (snake-state world [[1 1] [1 2]] :down)))
+        "Can see right when going down")
+    (is (= :wall (right-of (snake-state world [[1 1] [2 1]] :right)))
+        "Can see right when going right")
+    (is (= :apple (right-of (snake-state world [[1 0] [0 0]] :left)))
+        "Can see right when going left")))
