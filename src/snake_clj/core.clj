@@ -24,17 +24,31 @@
         x (mod (+ x xr) (arity-x world))]
     [x y]))
 
+(defn- move-left [world [x y] heading]
+  (let [[xr yr] (condp = heading
+                  :right [0 -1]
+                  :left [0 1]
+                  :up [-1 0]
+                  :down [1 0])
+        y (mod (+ y yr) (arity-y world))
+        x (mod (+ x xr) (arity-x world))]
+    [x y]))
+
 (defn- is-tail? [snake p]
   (some #(= p %) snake))
 
-(defn right-of [{:keys [world snake heading]}]
+(defn- direction-of [{:keys [world snake heading]} direction]
   (let [head (head snake)
-        new-head-position (move-right world head heading)]
+        new-head-position (direction world head heading)]
     (if (is-tail? snake new-head-position)
       :tail
       (get-at world new-head-position))))
 
-(defn left-of [])
+(defn right-of [snake-state]
+  (direction-of snake-state move-right))
+
+(defn left-of [snake-state]
+  (direction-of snake-state move-left))
 
 (defn ahead-of [])
 
