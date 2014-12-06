@@ -22,8 +22,12 @@
       "There is an apple right of snake")
   (let [world [[nil nil :wall]
                [nil nil nil]
-               [:apple nil nil]]]
+               [:apple nil :wall]]]
     (is (= :wall (right-of (snake-state world [[1 1] [1 0]] :up)))
-        "Can turn right when going up")
-    (is (= :apple (right-of (snake-state world [ [1 1] [1 2]] :down)))
-        "Can turn right when going down")))
+        "Can  see right when going up")
+    (is (= :apple (right-of (snake-state world [[1 1] [1 2]] :down)))
+        "Can see right when going down")
+    (is (= :wall (right-of (snake-state world [[1 1] [2 1]] :right)))
+        "Can see right when going right")
+    (is (= :apple (right-of (snake-state world [[1 0] [0 0]] :left)))
+        "Can see right when going left")))

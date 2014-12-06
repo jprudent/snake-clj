@@ -27,11 +27,10 @@
 (defn- is-tail? [snake p]
   (some #(= p %) snake))
 
-(defn right-of [{ :keys [world snake heading] :as snake-state}]
+(defn right-of [{:keys [world snake heading] :as snake-state}]
   (if world
     (let [head (head snake)
           new-head-position (move-right world head heading)]
-      (prn snake new-head-position world)
       (if (is-tail? snake new-head-position)
         :tail
         (get-at world new-head-position)))
