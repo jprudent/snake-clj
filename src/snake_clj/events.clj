@@ -129,3 +129,31 @@
                     (matrix/set-at (head-of snake) nil)
                     (matrix/set-at (somewhere-free world snake seed) :apple))
          :snake (grow-tail world snake heading)))
+
+;; Turned right
+
+(defmethod handle-event :turned-right
+  [{:keys [heading alive?] :as state} _]
+  {:pre [alive?]}
+  (assoc state :heading (heading {:down  :left,
+                                  :left  :up
+                                  :up    :right
+                                  :right :down})))
+
+;; Turned left
+
+(defmethod handle-event :turned-left
+  [{:keys [heading alive?] :as state} _]
+  {:pre [alive?]}
+  (assoc state :heading (heading {:down  :righ,
+                                  :left  :down
+                                  :up    :left
+                                  :right :up})))
+
+(defmethod handle-event :gone-ahead
+  [{:keys [world heading snake alive?] :as state} _]
+  {:pre [alive?]}
+  (assoc state
+         :snake (-> snake
+                    (conj (move-ahead world (head-of snake) heading))
+                    (subvec 1))))

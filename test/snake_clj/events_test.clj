@@ -60,3 +60,33 @@
     (is (and (= [0 0] (first snake))
              (= 3 (count snake)))
         "Apples are nutritive and made the snake tail grow")))
+
+(deftest test-turned-right
+  (let [world [[nil nil :wall]
+               [nil nil nil]
+               [:apple nil :wall]]
+        event (turned-right 12)
+        state (snake-state world [[1 1]] :right 42)
+        {:keys [heading]} (handle-event state event)]
+    (is (= :down heading))))
+
+
+(deftest test-turned-left
+  (let [world [[nil nil :wall]
+               [nil nil nil]
+               [:apple nil :wall]]
+        event (turned-left 12)
+        state (snake-state world [[1 1]] :up 42)
+        {:keys [heading]} (handle-event state event)]
+    (is (= :left heading))))
+
+(deftest test-gone-ahead
+  (let [world [[nil nil :wall]
+               [nil nil nil]
+               [:apple nil :wall]]
+        event (gone-ahead 12)
+        state (snake-state world [[1 1] [1 0]] :up 42)
+        {:keys [heading snake]} (handle-event state event)]
+    (is (= :up heading)
+        "Heading is not changed when gone ahead")
+    (is (= [[1 0] [1 2]] snake))))
