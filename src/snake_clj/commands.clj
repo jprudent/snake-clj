@@ -21,13 +21,11 @@
 
 (defn turn-right! [id]
   (println "turn right")
-  (apply db/store!
-         (move right-of evt/turned-right id)))
+  (apply db/store! [(evt/turned-right id)]))
 
 (defn turn-left! [id]
   (println "turn left")
-  (apply db/store!
-         (move left-of evt/turned-left id)))
+  (apply db/store! [(evt/turned-left id)]))
 
 (defn go-ahead! [id]
   (apply db/store!
