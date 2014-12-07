@@ -22,39 +22,47 @@
 (defn wall-texture [] (texture "wall.png"))
 (def mem-wall-texture (memoize wall-texture))
 
-(defn w->screen
+(defn wx->screen
   "Convert world position to screen position"
   [n]
   (* 4 n))
 
-(defn apple-entities [world]
+(defn wy->screen
+  "Convert world position to screen position"
+  [height n]
+  (* 4 (Math/abs (- n height))))
+
+(defn apple-entities [height world]
   (for [x (range (matrix/arity-x world))
         y (range (matrix/arity-y world))
         :when (c/apple? (matrix/get-at world [x y]))]
     (assoc (mem-apple-texture)
-           :x (w->screen x)
-           :y (w->screen y))))
+           :x (wx->screen x)
+           :y (wy->screen height y))))
 
-(defn snake-entities [snake]
+(defn snake-entities [height snake]
   (for [snake-bit snake
         :let [[snake-x snake-y] snake-bit]]
     (assoc (mem-snake-texture)
-           :x (w->screen snake-x)
-           :y (w->screen snake-y))))
+           :x (wx->screen snake-x)
+           :y (wy->screen height snake-y))))
 
-(defn wall-entities [world]
+(defn wall-entities [height world]
   (for [x (range (matrix/arity-x world))
         y (range (matrix/arity-y world))
         :when (c/wall? (matrix/get-at world [x y]))]
     (assoc (mem-wall-texture)
-           :x (w->screen x)
-           :y (w->screen y))))
+           :x (wx->screen x)
+           :y (wy->screen height y))))
 
 (defn update-entities []
-  (let [{:keys [seed world snake]} (db/load-aggregate game-id)]
-    (-> (into [] (apple-entities world))
-        (into (snake-entities snake))
-        (into (wall-entities world)))))
+  (let [{:keys [world snake]} (db/load-aggregate game-id)
+        height (matrix/arity-y world)]
+    (println world)
+    (println snake)
+    (-> (into [] (apple-entities height world))
+        (into (snake-entities height snake))
+        (into (wall-entities height world)))))
 
 ;; Original nokia is 84 x 48 pixels, but we will use virtual pixels of 4 pixels
 (def w (* 84 4))
@@ -80,8 +88,8 @@
            (fn [screen _]
              (screen-wrapper)
              (init-graphic-settings screen)
+             (db/delete! game-id)
              (cmd/start-game! game-id seed)
-             (add-timer! screen :go-ahead 1 1)
              (update-entities))
 
            :on-resize
@@ -94,11 +102,14 @@
              (render! screen entities)
              (update-entities))
 
-           :on-timer
+           :on-key-down
            (fn [screen entities]
-             (print (str "timer ! " (:id screen)))
-             (case (:id screen)
-               :go-ahead (cmd/go-ahead! game-id)
+             (condp = (:key screen)
+               (key-code :escape) (do (db/delete! game-id)
+                                      (cmd/start-game! game-id seed))
+               (key-code :f) (cmd/go-ahead! game-id)
+               (key-code :k) (cmd/turn-right! game-id)
+               (key-code :j) (cmd/turn-left! game-id)
                nil)
              entities))
 

@@ -13,3 +13,6 @@
            (fn [event-store]
              (update-in event-store [id] #(vec (conj % event)))))))
 
+(defn delete! [id]
+  (swap! event-store dissoc id))
+
