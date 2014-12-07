@@ -59,7 +59,7 @@
   {:pre [(nil? state)]}
   (binding [gen/*rnd* (Random. seed)]
     (let [world (rand-world)]
-      (snake-state world (rand-position world) (rand-heading) seed))))
+      (snake-state world [(rand-position world)] (rand-heading) seed))))
 
 ;; HIT WALL
 

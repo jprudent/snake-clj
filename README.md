@@ -17,7 +17,11 @@ Handle runtime exceptions :
                                (try (screen-fn)
                                  (catch Exception e
                                    (.printStackTrace e)
-                                   ))))
+                                   (Thread/sleep 10000)))))
+
+Reload the screen :
+
+        (on-gl (set-screen! snake-clj-game main-screen))
 
 
 

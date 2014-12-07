@@ -1,25 +1,80 @@
 (ns snake-clj.opengl.core
-  (:import (java.util UUID))
+  (:import (java.util UUID)
+           (com.badlogic.gdx.utils.viewport FitViewport))
   (:require [snake-clj.commands :as cmd]
+            [snake-clj.matrix :as matrix]
+            [snake-clj.core :as c]
+            [snake-clj.db :as db]
             [play-clj.core :refer :all]
-            [play-clj.ui :refer :all]))
-(def game-id (atom 0))
+            [play-clj.ui :refer :all]
+            [play-clj.g2d :refer :all]))
+
+(declare snake-clj-game main-screen)
+(def game-id 21)
 (def seed 42)
 
+(defn apple-texture [] (texture "apple.png"))
+(def mem-apple-texture (memoize apple-texture))
+
+(defn snake-texture [] (texture "snake.png"))
+(def mem-snake-texture (memoize snake-texture))
+
+(defn w->screen
+  "Convert world position to screen position"
+  [n]
+  (* 4 n))
+
+(defn apple-entities [world]
+  (for [x (range (matrix/arity-x world))
+        y (range (matrix/arity-y world))
+        :when (c/apple? (matrix/get-at world [x y]))]
+    (assoc (mem-apple-texture)
+           :x (w->screen x)
+           :y (w->screen y))))
+
+(defn snake-entities [snake]
+  (for [snake-bit snake
+        :let [[snake-x snake-y] snake-bit]]
+    (assoc (mem-snake-texture)
+           :x (w->screen snake-x)
+           :y (w->screen snake-y))))
+
+(defn update-entities []
+  (let [{:keys [seed world snake]} (db/load-aggregate game-id)]
+    (-> (into [] (apple-entities world))
+        (into (snake-entities snake)))))
+
+;; Original nokia is 84 x 48 pixels, but we will use virtual pixels of 4 pixels
+(def w (* 84 4))
+(def h (* 48 4))
+
+(defn stage-fit-vp []
+  (stage :set-viewport (FitViewport. w h)))
+
+(defn init-graphic-settings [screen]
+  (update! screen
+           :camera (orthographic)
+           :renderer (stage-fit-vp)))
+
 (defscreen main-screen
-  :on-show
-  (fn [screen entities]
-    (update! screen :renderer (stage))
-    (label "Seed" seed))
-  
-  :on-render
-  (fn [screen entities]
-    (clear!)
-    (render! screen entities)))
+           :on-show
+           (fn [screen _]
+             (init-graphic-settings screen)
+             (println (width screen))
+             (update-entities))
+
+           :on-resize
+           (fn [screen _]
+             (size! screen w h))
+
+           :on-render
+           (fn [screen entities]
+             (clear!)
+             (render! screen entities)
+             (update-entities)))
 
 (defgame snake-clj-game
-  :on-create
-  (fn [this]
-    (swap! game-id (fn [_] (UUID/randomUUID)))
-    (cmd/start-game! @game-id seed)
-    (set-screen! this main-screen)))
+         :on-create
+         (fn [this]
+           (cmd/start-game! game-id seed)
+           (set-screen! this main-screen)))

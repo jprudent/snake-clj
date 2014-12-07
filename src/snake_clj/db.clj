@@ -1,8 +1,11 @@
-(ns snake-clj.db)
+(ns snake-clj.db
+  (:require [snake-clj.events :as evt]
+  ))
 
 (def event-store (atom {}))
 
-(defn load-aggregate [id])
+(defn load-aggregate [id]
+  (reduce (fn [state event] (evt/handle-event state event)) nil (@event-store id)))
 
 (defn store! [& events]
   (doseq [{id :id :as event} events]
