@@ -44,11 +44,11 @@
 
 (defn wall-entities [world]
   (for [x (range (matrix/arity-x world))
-          y (range (matrix/arity-y world))
-          :when (c/wall? (matrix/get-at world [x y]))]
-      (assoc (mem-wall-texture)
-             :x (w->screen x)
-             :y (w->screen y))))
+        y (range (matrix/arity-y world))
+        :when (c/wall? (matrix/get-at world [x y]))]
+    (assoc (mem-wall-texture)
+           :x (w->screen x)
+           :y (w->screen y))))
 
 (defn update-entities []
   (let [{:keys [seed world snake]} (db/load-aggregate game-id)]
@@ -72,7 +72,7 @@
            :on-show
            (fn [screen _]
              (init-graphic-settings screen)
-             (println (width screen))
+             (add-timer! screen :go-ahead 1 1)
              (update-entities))
 
            :on-resize
@@ -83,7 +83,15 @@
            (fn [screen entities]
              (clear!)
              (render! screen entities)
-             (update-entities)))
+             (update-entities))
+
+           :on-timer
+           (fn [screen entities]
+             (print (str "timer ! " (:id screen)))
+             (case (:id screen)
+               :go-ahead (cmd/go-ahead! game-id)
+               nil)
+             entities))
 
 (defgame snake-clj-game
          :on-create

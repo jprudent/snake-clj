@@ -27,6 +27,6 @@
   (apply db/store!
          (move left-of evt/turned-left id)))
 
-(defn go-ahead! [{id :id}]
+(defn go-ahead! [id]
   (apply db/store!
          (move ahead-of evt/gone-ahead id)))
