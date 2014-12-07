@@ -80,6 +80,7 @@
            (fn [screen _]
              (screen-wrapper)
              (init-graphic-settings screen)
+             (cmd/start-game! game-id seed)
              (add-timer! screen :go-ahead 1 1)
              (update-entities))
 
@@ -104,5 +105,4 @@
 (defgame snake-clj-game
          :on-create
          (fn [this]
-           (cmd/start-game! game-id seed)
            (set-screen! this main-screen)))
