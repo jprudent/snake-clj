@@ -6,5 +6,5 @@
 
 (defn -main
   []
-  (LwjglApplication. play-clj-template "play-clj-template" 800 600)
+  (LwjglApplication. snake-clj-game "play-clj-template" 800 600)
   (Keyboard/enableRepeatEvents true))

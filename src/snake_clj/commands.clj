@@ -4,8 +4,9 @@
     [snake-clj.events :as evt]
     [snake-clj.db :as db]))
 
-(defn start-game []
-  (evt/game-started (db/next-id) 42))
+
+(defn start-game! [id seed]
+  (db/store! (evt/game-started id seed)))
 
 (defn- move [direction-of event-factory id]
   (when-let [snake (db/load-aggregate id)]
@@ -18,11 +19,14 @@
         [turned-evt]
         [turned-evt hit-smthing-evt]))))
 
-(defn turn-right [{id :id}]
-  (move right-of evt/turned-right id))
+(defn turn-right! [{id :id}]
+  (apply db/store!
+         (move right-of evt/turned-right id)))
 
-(defn turn-left [{id :id}]
-  (move left-of evt/turned-left id))
+(defn turn-left! [{id :id}]
+  (apply db/store!
+         (move left-of evt/turned-left id)))
 
-(defn go-ahead [{id :id}]
-  (move ahead-of evt/gone-ahead id))
+(defn go-ahead! [{id :id}]
+  (apply db/store!
+         (move ahead-of evt/gone-ahead id)))
