@@ -110,13 +110,14 @@
 (defn- tail-heading
   "compute the heading of tail"
   [world snake heading]
-  (if (>= 2 (count snake))
+  (if (>= (count snake) 2)
     (neck-heading world (second snake) (first snake))
     heading))
 
 (defn- grow-tail [world snake heading]
   (let [tailest (first snake)
-        rev-tail-heading (reverse-heading (tail-heading world snake heading))
+        tail-heading (tail-heading world snake heading)
+        rev-tail-heading (reverse-heading  tail-heading)
         new-tailest (move-ahead world tailest rev-tail-heading)]
     (into [new-tailest] snake)))
 

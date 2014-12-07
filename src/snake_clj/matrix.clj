@@ -21,5 +21,4 @@
           (vector? (first matrix))]
    :post [(vector? %)]}
   (let [line (nth matrix y)]
-    (prn "matrix : " matrix x y v line)
     (assoc matrix y (assoc line x v))))

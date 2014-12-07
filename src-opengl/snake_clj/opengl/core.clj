@@ -68,9 +68,17 @@
            :camera (orthographic)
            :renderer (stage-fit-vp)))
 
+(defn screen-wrapper []
+  (set-screen-wrapper! (fn [screen screen-fn]
+                         (try (screen-fn)
+                              (catch Exception e
+                                (.printStackTrace e)
+                                (Thread/sleep 10000))))))
+
 (defscreen main-screen
            :on-show
            (fn [screen _]
+             (screen-wrapper)
              (init-graphic-settings screen)
              (add-timer! screen :go-ahead 1 1)
              (update-entities))
