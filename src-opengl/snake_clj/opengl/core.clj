@@ -19,6 +19,10 @@
 (defn snake-texture [] (texture "snake.png"))
 (def mem-snake-texture (memoize snake-texture))
 
+(defn snake-head-up-texture [heading]
+  (texture (str "snake-head-" (name heading) ".png")))
+(def mem-snake-head-up-texture (memoize snake-head-up-texture))
+
 (defn wall-texture [] (texture "wall.png"))
 (def mem-wall-texture (memoize wall-texture))
 
@@ -40,12 +44,18 @@
            :x (wx->screen x)
            :y (wy->screen height y))))
 
-(defn snake-entities [height snake]
-  (for [snake-bit snake
-        :let [[snake-x snake-y] snake-bit]]
-    (assoc (mem-snake-texture)
-           :x (wx->screen snake-x)
-           :y (wy->screen height snake-y))))
+(defn snake-head-entity [height [head-x head-y] heading]
+  (assoc (mem-snake-head-up-texture heading)
+         :x (wx->screen head-x)
+         :y (wy->screen height head-y)))
+
+(defn snake-entities [height snake heading]
+  (into [(snake-head-entity height (c/head-of snake) heading)]
+        (for [snake-bit (c/tail-of snake)
+              :let [[snake-x snake-y] snake-bit]]
+          (assoc (mem-snake-texture)
+                 :x (wx->screen snake-x)
+                 :y (wy->screen height snake-y)))))
 
 (defn wall-entities [height world]
   (for [x (range (matrix/arity-x world))
@@ -56,13 +66,13 @@
            :y (wy->screen height y))))
 
 (defn update-entities []
-  (let [{:keys [world snake]} (db/load-aggregate game-id)
+  (let [{:keys [world snake alive? heading]} (db/load-aggregate game-id)
         height (matrix/arity-y world)]
-    (println world)
-    (println snake)
-    (-> (into [] (apple-entities height world))
-        (into (snake-entities height snake))
-        (into (wall-entities height world)))))
+    (if alive?
+      (-> (into [] (apple-entities height world))
+          (into (snake-entities height snake heading))
+          (into (wall-entities height world)))
+      [(label "DEAD" (color :red))])))
 
 ;; Original nokia is 84 x 48 pixels, but we will use virtual pixels of 4 pixels
 (def w (* 84 4))
@@ -115,5 +125,4 @@
 (defgame snake-clj-game
          :on-create
          (fn [this]
-           (screen-wrapper)
            (set-screen! this main-screen)))
