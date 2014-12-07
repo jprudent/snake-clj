@@ -19,6 +19,9 @@
 (defn snake-texture [] (texture "snake.png"))
 (def mem-snake-texture (memoize snake-texture))
 
+(defn wall-texture [] (texture "wall.png"))
+(def mem-wall-texture (memoize wall-texture))
+
 (defn w->screen
   "Convert world position to screen position"
   [n]
@@ -39,10 +42,19 @@
            :x (w->screen snake-x)
            :y (w->screen snake-y))))
 
+(defn wall-entities [world]
+  (for [x (range (matrix/arity-x world))
+          y (range (matrix/arity-y world))
+          :when (c/wall? (matrix/get-at world [x y]))]
+      (assoc (mem-wall-texture)
+             :x (w->screen x)
+             :y (w->screen y))))
+
 (defn update-entities []
   (let [{:keys [seed world snake]} (db/load-aggregate game-id)]
     (-> (into [] (apple-entities world))
-        (into (snake-entities snake)))))
+        (into (snake-entities snake))
+        (into (wall-entities world)))))
 
 ;; Original nokia is 84 x 48 pixels, but we will use virtual pixels of 4 pixels
 (def w (* 84 4))
