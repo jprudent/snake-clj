@@ -69,5 +69,7 @@
          (> (matrix/arity-y world) 0)
          (vector? snake)
          (vector? (first snake))
+         (vector? world)
+         (vector? (first world))
          (#{:up :down :right :left} heading)]}
   {:world world :snake snake :heading heading :alive? true :seed seed})

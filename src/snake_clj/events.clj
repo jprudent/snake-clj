@@ -44,8 +44,10 @@
                  (fn [] nil) 20}))
 
 (defn- rand-world []
-  (partition 5 (for [_ (range 25)]
-                 (rand-cell))))
+  (vec
+    (map vec
+         (partition 5 (for [_ (range 25)]
+                        (rand-cell))))))
 
 (defn- rand-heading []
   (gen/one-of :up :down :right :left))
