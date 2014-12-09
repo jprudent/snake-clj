@@ -31,7 +31,9 @@
                                       :up    [0 -1]
                                       :down  [0 1]}))
 
-(defn is-tail? [tail p]
+(defn- is-tail?
+  "true if p is a part of the tail"
+  [tail p]
   (some #(= p %) tail))
 
 (defn- direction-of [{:keys [world snake heading]} move-direction]
@@ -55,6 +57,20 @@
   "Peek what's ahead"
   [snake-state]
   (direction-of snake-state move-ahead))
+
+(defn what-is-at
+  "returns the thing at position"
+  [{:keys [world snake]} p]
+  {:post [(contains? #{nil :tail :apple :wall} %)]}
+  (if (is-tail? (tail-of snake) p)
+    :tail
+    (matrix/get-at world p)))
+
+(defn what-is-on-head
+  "returns the thing at the head position"
+  [{snake :snake :as snake-state}]
+  {:post [(contains? #{nil :tail :apple :wall} %)]}
+  (what-is-at snake-state (head-of snake)))
 
 (defn apple? [cell] (= :apple cell))
 

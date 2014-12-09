@@ -79,24 +79,23 @@
 ;; EAT TAIL
 
 (defmethod handle-event :ate-tail
-  [{:keys [snake alive?] :as state} _]
+  [{:keys [alive?] :as state} _]
   {:pre [alive?
-         (is-tail? (tail-of snake) (head-of snake))]}
+         (tail? (what-is-on-head state))]}
   (kill state))
 
 ;; ATE APPLE
 
-(defn- free-cells [world snake]
+(defn- free-cells [{world :world :as snake-state}]
   (for [x (range (matrix/arity-x world))
         y (range (matrix/arity-y world))
         :let [p [x y]]
-        :when (and (not (is-tail? snake p))
-                   (nil? (matrix/get-at world p)))]
+        :when (= nil (what-is-at snake-state p))]
     p))
 
-(defn- somewhere-free [world snake seed]
+(defn- somewhere-free [{:keys [seed] :as snake-state}]
   (binding [gen/*rnd* (Random. seed)]
-    (apply gen/one-of (free-cells world snake))))
+    (apply gen/one-of (free-cells snake-state))))
 
 (defn- reverse-heading [heading]
   (heading {:right :left, :left :right, :up :down, :down :up}))
@@ -117,19 +116,19 @@
 (defn- grow-tail [world snake heading]
   (let [tailest (first snake)
         tail-heading (tail-heading world snake heading)
-        rev-tail-heading (reverse-heading  tail-heading)
+        rev-tail-heading (reverse-heading tail-heading)
         new-tailest (move-ahead world tailest rev-tail-heading)]
     (into [new-tailest] snake)))
 
 (defmethod handle-event :ate-apple
-  [{:keys [world snake alive? heading seed] :as state} _]
+  [{:keys [world snake alive? heading seed] :as snake-state} _]
   {:pre [alive?
          (integer? seed)
          (apple? (matrix/get-at world (head-of snake)))]}
-  (assoc state
+  (assoc snake-state
          :world (-> world
                     (matrix/set-at (head-of snake) nil)
-                    (matrix/set-at (somewhere-free world snake seed) :apple))
+                    (matrix/set-at (somewhere-free snake-state) :apple))
          :snake (grow-tail world snake heading)))
 
 ;; Turned right

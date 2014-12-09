@@ -13,7 +13,7 @@ Launch the game :
 Handle runtime exceptions :
 
         (in-ns 'snake-clj.opengl.core)
-        (set-screen-wrapper! (fn [screen screen-fn]
+        (play-clj.core/set-screen-wrapper! (fn [screen screen-fn]
                                (try (screen-fn)
                                  (catch Exception e
                                    (.printStackTrace e)

@@ -4,8 +4,12 @@
 
 (def event-store (atom {}))
 
-(defn load-aggregate [id]
-  (reduce (fn [state event] (evt/handle-event state event)) nil (@event-store id)))
+(defn load-aggregate
+  "load the aggregate of id. Extra events can be provided to make simulations."
+  [id & extra-events]
+  (reduce (fn [state event] (evt/handle-event state event))
+          nil
+          (into (@event-store id) extra-events)))
 
 (defn store! [& events]
   (doseq [{id :id :as event} events]
